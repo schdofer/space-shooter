@@ -12,7 +12,7 @@ body {
     height: 100vh;
     display: flex;
     justify-content: center;
-    align-items: center;    
+    align-items: center;
     font-family: var(--font-default);
     background-color: cornflowerblue;
 }
@@ -22,6 +22,22 @@ main {
     background-image: url(assets/images/space.png);
     width: 600px;
     height: 600px;    
+}
+
+.game-instructions {
+    position: relative;
+    color: white;
+    left: 4.5rem;
+    top: 0;
+    font-size: 1.25em;
+}
+
+#start-button {
+    position: relative;
+    color: white;
+    top: 9rem;
+    left: 15rem;
+    cursor: pointer;
 }
 
 .hero {
@@ -42,5 +58,18 @@ main {
     position: relative;
     height: 60px;
     width: 70px;
-    left: 390px; 
+    left: 390px;
 }
+
+.enemy-transition {
+    opacity: 1;
+    transition: opacity 1.5s ease-in-out;
+}
+
+.dead-enemy {
+    position: relative;
+    height: 60px;
+    width: 70px;
+    opacity: 0;
+}
+

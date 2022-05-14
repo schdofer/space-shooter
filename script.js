@@ -1,5 +1,8 @@
 const hero = document.querySelector('.hero');
 const playArea = document.querySelector('main');
+const gameInstructions = document.querySelector('.game-instructions');
+const startButton = document.querySelector('#start-button');
+let gameLoopInterval;
 
 // Voando com a nave
 function flyShip(event) {
@@ -35,7 +38,6 @@ function moveDown() {
     if (topPosition >= '540px') {
         return;
     } else {
-        createEnemy();
         let position = parseInt(topPosition);
         position += 50;
         hero.style.top = position + 'px';
@@ -65,6 +67,14 @@ function createLaserElement() {
 function moveLaser(laser) {
     let laserInterval = setInterval(() => {
         let positionX = parseInt(laser.style.left);
+        const enemies = document.querySelectorAll('.enemy');
+        enemies.forEach((enemy) => {
+            if (checkLaserCollision(laser, enemy)) {
+                enemy.src = 'assets/images/explosion.png';
+                enemy.classList.remove('enemy');
+                enemy.classList.add('dead-enemy');
+            }
+        });
 
         if (positionX >= 340) {
             laser.remove();
@@ -79,7 +89,7 @@ function moveLaser(laser) {
 function createEnemy() {
     const enemyImgSrc = shuffleEnemyImg();
     const enemy = document.createElement('img');
-    const enemyPosition = shuffleEnemyPosition();    
+    const enemyPosition = shuffleEnemyPosition();
     enemy.src = enemyImgSrc;
     enemy.style.top = enemyPosition + 'px';
     enemy.classList.add('enemy');
@@ -97,10 +107,84 @@ function shuffleEnemyImg() {
 
 // Sorteia position do inimigo
 function shuffleEnemyPosition() {
-    const positionY = Math.floor( Math.random() * 540 );
+    const positionY = Math.floor(Math.random() * 540);
     return positionY;
 }
 
+// Função para movimentar inimigos
+function moveEnemy(enemy) {
+    let moveEnemyInterval = setInterval(() => {
+        let positionX = parseInt(window.getComputedStyle(enemy).getPropertyValue('left'));
+        if (positionX <= 10) {
+            // Seinimigo chegar a menos de 50px sem a classe de morto, então perdemos
+            if (Array.from(enemy.classList).includes('dead-enemy')) {
+                enemy.remove();
+                clearInterval(moveEnemyInterval);
+            } else {
+                // game over
+                clearInterval(gameLoopInterval);
+            }
+        } else {
+            enemy.style.left = (positionX - 4) + 'px';
+        }
+    }, 30);
+}
 
-// Add handlers do Game
-document.body.addEventListener('keydown', flyShip);
+// Função para tratar colisão
+function checkLaserCollision(laser, enemy) {
+    const laserLeft = parseInt(laser.style.left);
+    const laserTop = parseInt(laser.style.top);
+    const laserBottom = laserTop - 20;
+
+    const enemyLeft = parseInt(enemy.style.left);
+    const enemyTop = parseInt(enemy.style.top);
+    const enemyBottom = enemyTop - 20;
+
+    if (laserLeft != 340 && laserLeft + 40 >= enemyLeft) {
+        if (laserTop <= enemyTop && laserTop >= enemyBottom) {
+            return true;
+        }
+    }
+    return false;
+}
+
+
+// Start Game e loop
+function playGame() {
+    startButton.style.display = 'none';
+    gameInstructions.style.display = 'none';
+
+    // Add handlers do Game
+    document.body.addEventListener('keydown', flyShip);
+    gameLoop();
+}
+
+// Loop do Game
+function gameLoop() {
+    const ramdomCreateEnemy = Math.floor((Math.random() * 3) + 2) * 1000;
+    let gameLoopInterval = setInterval(() => {
+        createEnemy();
+    }, ramdomCreateEnemy);
+}
+
+// Função de Game Over
+function gameOver() {
+    window.removeEventListener('keydown', flyShip);
+    clearInterval(gameLoopInterval);
+    // Remove enemies
+    document.querySelectorAll('.enemy')
+        .forEach((enemy) => enemy.remove());
+    // Remove lasers
+    document.querySelectorAll('.laser')
+        .forEach((laser) => laser.remove());
+
+    setTimeout(() => {
+        window.alert('Game Over!!');
+        hero.style.top = '250px';
+        gameInstructions.style.display = 'block';
+        startButton.style.display = 'block';
+    }, 100);
+}
+
+// Adiciona Start Game ao Botão
+startButton.addEventListener('click', playGame);
